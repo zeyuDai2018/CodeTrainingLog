@@ -48,3 +48,93 @@ public:
 
 总结：简单题，但是算法题还是做得少了，虽然学过hash表但是最简单的空间换时间都不会，现在开始应记牢。
 ```
+
+### LeetCode002
+```
+两个非空的链表，表示两个非负的整数。它们每位数字都是按照逆序的方式存储的，并且每个节点只能存储一位数字。
+将两个数相加，并以相同形式返回一个表示和的链表，可以假设除了数字0之外，这两个数都不会以0开头。
+
+/**
+ * Definition for singly-linked list.
+ * struct ListNode {
+ *     int val;
+ *     ListNode *next;
+ *     ListNode() : val(0), next(nullptr) {}
+ *     ListNode(int x) : val(x), next(nullptr) {}
+ *     ListNode(int x, ListNode *next) : val(x), next(next) {}
+ * };
+ */
+ 
+解题思路1：用两个指针遍历两个链表，低位对应相加，用数组记录结果同时记下进位用于高位相加。链表相加结束之
+后，重新建立一个链表，将数组中的值加入链表中。
+class Solution {
+public:
+    ListNode* addTwoNumbers(ListNode* l1, ListNode* l2) {
+        int parity=0;
+        ListNode *iterator1 = l1;
+        ListNode *iterator2 = l2;
+        vector<int> values(100,0);
+        int i = 0;
+        while(1){
+            if(iterator1 != nullptr && iterator2 != nullptr){
+                values[i]=(parity + iterator1->val + iterator2->val)%10;
+                if(parity + iterator1->val + iterator2->val > 9){
+                    parity = 1;
+                }
+                else{
+                    parity = 0;
+                }
+                i++;
+                iterator1 = iterator1->next;
+                iterator2 = iterator2->next;
+            }
+            else if(iterator1 != nullptr && iterator2 == nullptr){
+                values[i]=(parity + iterator1->val)%10;
+                if(parity + iterator1->val > 9){
+                    parity = 1;
+                }
+                else{
+                    parity = 0;
+                }
+                i++;
+                iterator1 = iterator1->next;
+            }
+            else if(iterator1== nullptr && iterator2 != nullptr){
+                values[i]=(parity + iterator2->val)%10;
+                if(parity + iterator2->val > 9){
+                    parity = 1;
+                }
+                else{
+                    parity = 0;
+                }
+                i++;
+                iterator2 = iterator2->next;
+            }
+            else if(iterator1== nullptr && iterator2 == nullptr){
+                values[i]=parity;
+                if(parity)
+                i++;
+                break;
+            }
+        }
+        ListNode *tmp = new ListNode;
+        for (int j=i-1; j>=0;j--){
+            ListNode *p = new ListNode;
+            p->val = values[j];
+            if(j==i-1){
+                p->next = NULL;
+                tmp = p;
+            }
+            else{
+                p->next = tmp;
+                tmp = p;
+            }
+        }
+        return tmp;
+
+    }
+};
+典型的暴力法，时间复杂度为O(n)，空间复杂度为O(n)，此处两个n都是最长的链表长度。需要修改的是是否能在遍历
+的过程中就实现结果链表的生成。
+
+```
