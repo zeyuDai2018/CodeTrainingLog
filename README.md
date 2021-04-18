@@ -139,7 +139,84 @@ public:
 };
 这里有个关于leetcode的小细节，新建节点不能malloc必须new，否则运行出错。
 典型的暴力法，时间复杂度为O(n)，空间复杂度为O(n)，此处两个n都是最长的链表长度。
-结果的时间复杂度还行，但是空间复杂度过高了，需要改进的是在遍历的过程中就实现结
-果链表的生成，从而避免临时数组的使用。
+结果的时间复杂度还行，但是空间复杂度过高了，改进方法是在遍历的过程中就实现结果
+链表的生成，从而避免临时数组的使用，也少写一个for循环：
+class Solution {
+public:
+    ListNode* addTwoNumbers(ListNode* l1, ListNode* l2) {
+        int parity=0;
+        ListNode *iterator1 = l1;
+        ListNode *iterator2 = l2;
+        int value = 0;
+        int i = 0;
+        int endloop = 0;
+        ListNode *ret = new ListNode;
+        ListNode *prev = new ListNode;
+        while(endloop!=1){
+            ListNode *current = new ListNode;
+            current->next = NULL;
+            if(iterator1 != nullptr && iterator2 != nullptr){
+                value=(parity + iterator1->val + iterator2->val)%10;
+                if(parity + iterator1->val + iterator2->val > 9){
+                    parity = 1;
+                }
+                else{
+                    parity = 0;
+                }
+                i++;
+                current->val = value;
+                iterator1 = iterator1->next;
+                iterator2 = iterator2->next;
+            }
+            else if(iterator1 != nullptr && iterator2 == nullptr){
+                value=(parity + iterator1->val)%10;
+                if(parity + iterator1->val > 9){
+                    parity = 1;
+                }
+                else{
+                    parity = 0;
+                }
+                i++;
+                current->val = value;
+                iterator1 = iterator1->next;
+            }
+            else if(iterator1== nullptr && iterator2 != nullptr){
+                value = (parity + iterator2->val)%10;
+                if(parity + iterator2->val > 9){
+                    parity = 1;
+                }
+                else{
+                    parity = 0;
+                }
+                i++;
+                current->val = value;
+                iterator2 = iterator2->next;
+            }
+            else if(iterator1== nullptr && iterator2 == nullptr){
+                value=parity;
+                if(parity){
+                    i++;
+                    current->val = value;
+                    current->next = NULL;
+                }
+                endloop = 1;
+            }
+            if(endloop!=1||(endloop==1&&parity==1)){
+                if(i==1){
+                    ret = current;
+                    prev = current;
+                }
+                else{
+                    prev->next = current;
+                    prev = current;
+                }
+            }
+        }
+        return ret;
 
+    }
+};
+这是很容易想到的写法，但是代码搓的少，就先写了个简答版在改进。最终的速度还行，
+但是内存只超过了%8的人，看了一下题解，有人用输入链表作返回，个人认为有点本末
+倒置，我的算法空间复杂度O(n)我觉得不需要改进了。
 ```
