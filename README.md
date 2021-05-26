@@ -216,3 +216,55 @@ public:
 但是内存只超过了%8的人，看了一下题解，有人用输入链表作返回，个人认为有点本末
 倒置，我的算法空间复杂度O(n)都是用来新建返回链表了，感觉不需要改进了。
 
+### LeetCode003
+```
+给定一个字符串，找出其中不含有重复字符的最长子串的长度。
+```
+```
+解题思路1：暴力破解三层for循环，遍历每个字符作为开头的不重复子串长度，但是时间
+复杂度O(n2)还要借助哈稀图来判断是否有重复，很笨重，显然有更简单的方。
+```
+```
+解题思路2：使用滑动窗口法，可以看出，实际上选择好左边的起始字符之后，用哈稀图记
+录下遍历过得中间字符，每次遭遇重复时由于已知和几号字符重复，所以可以将左边的起始
+字符向右移动到重复的位置上，然后接着上次的进度继续遍历。使用左右指针和一个哈稀图
+来做（也可以用int[128]来做，因为ASCII码只有128个）。
+class Solution {
+public:
+    int lengthOfLongestSubstring(string s) {
+        map<char, int> array_map;
+        int tmpmax = 0;
+        int windowsize = 0;
+        map<char,int>::iterator iter;
+        int left = 0;
+        for(int i=0;i<s.size();i++){//i是又指针left是左指针
+            iter = array_map.find(s[i]);
+            if(iter == array_map.end()){//如果哈西图中无重复元素则插入
+                array_map.insert(pair<int, int>(s[i],i ));
+                windowsize++;
+            }
+            else{
+                if(iter->second>=left){//如果有重复，则判断是否在窗口间
+                    tmpmax = max(tmpmax,windowsize);
+                    left = iter->second+1;//重复的话，left左移一位
+                    windowsize = i-left+1;
+                    array_map.erase(iter);//在窗口间则删原记录插新记录
+                    array_map.insert(pair<int, int>(s[i],i ));
+                }
+                else{         
+                    windowsize++;//如果不在窗口间则增大窗口，覆盖原重复元素
+                    array_map.erase(iter);
+                    array_map.insert(pair<int, int>(s[i],i ));
+                }
+            }
+        }
+        tmpmax = max(tmpmax,windowsize);//防止最后一次最大
+        return tmpmax;
+    }
+};
+
+```
+看答案之前想了很久，总觉得自己能想到，看了答案才发现思考的不够，滑动窗口需要多练，
+中间那里如何判断是否在窗口内自己没思考出来，真是蠢死。
+
+
