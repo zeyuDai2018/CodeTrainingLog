@@ -1,6 +1,5 @@
-### LeetCode001
+### LeetCode001 两数之和
 ```
-题目：
 给定一个整数数组nums和一个整数目标值target，在该数组中找出和为目标值的那两个整数，
 并返回它们的数组下标。假设每种输入只会对应一个答案。但数组中同一个元素在答案里不能
 重复出现，可以按任意顺序返回答案。
@@ -54,7 +53,7 @@ public:
 现在开始应记牢。
 
 
-### LeetCode002
+### LeetCode002 两数相加
 ```
 两个非空的链表，表示两个非负的整数。它们每位数字都是按照逆序的方式存储的，并且每个
 节点只能存储一位数字。将两个数相加，并以相同形式返回一个表示和的链表，可以假设除了
@@ -216,7 +215,7 @@ public:
 但是内存只超过了%8的人，看了一下题解，有人用输入链表作返回，个人认为有点本末
 倒置，我的算法空间复杂度O(n)都是用来新建返回链表了，感觉不需要改进了。
 
-### LeetCode003
+### LeetCode003 无重复最长子串
 ```
 给定一个字符串，找出其中不含有重复字符的最长子串的长度。
 ```
@@ -268,7 +267,7 @@ public:
 中间那里如何判断是否在窗口内自己没思考出来，真是蠢死。时间复杂度O(n)空间复杂度也
 时O(n)。
 
-### LeetCode004
+### LeetCode004 两正序数组求中位数
 ```
 给定两个有序数组，其中起码一个不为空，求他们两个数组集合中的整体中位数。偶数位则
 返回中间两个数的均值，奇数则返回中间数。
@@ -316,5 +315,55 @@ public:
 但是又可能导致边界上的元素无法进入判断大小，最后把逻辑改的面目全非思路也混乱实际上
 判断条件中从左到右会依次如果越界则已经满足了if，不会去访问越界的数组地址。
 
+### LeetCode005 最长回文子串
+```
+形如aba或者abba叫做回文子串，即从左到右从右到左都是同样的字符串，现给定一个字符串，
+串长大于一，求他的最长回文子串。
+```
+```
+解题思路：中心扩展法，回文串最短为1，如果在此基础上扩展，则需要中间元素的左右都相同，
+如果符合回文则在左右继续扩展，对于bb类型同样左右扩展，所以进行两个for循环，谁更长，
+得到结果之后根据循环中的index返回子串。
+class Solution {
+public:
+    string longestPalindrome(string s) {
+        int maxindex=0,maxlength=1,emaxindex=0,emaxlength=0;
+        int j=0;
+        for(int i=0;i<s.length();i++){//寻找以单个字符为中心的对称子串
+            j=1;//这里先判断是否越界再决定是否访问
+            while((i-j>=0&&i+j<s.length())&&(s[i-j]==s[i+j])){
+                if(2*j+1>=maxlength){
+                    maxlength = 2*j+1;
+                    maxindex = i;
+                }
+                j++;
+            }
+        }
+        for(int i=0;i<s.length();i++){//寻找以两个字符为中心的对称子串
+            j=1;
+            if(i+1<s.length()&&s[i]==s[i+1]){
+                if(emaxlength==0){
+                    emaxlength = 2;
+                    emaxindex=i;
+                }//这里先判断是否越界再决定是否访问
+                while((i-j>=0&&i+j<s.length())&&(s[i-j]==s[i+j+1])){
+                    if(2*j+2>=emaxlength){
+                        emaxlength = 2*j+2;
+                        emaxindex = i;
+                    }
+                    j++;
+                }
+            }            
+        }
+        if(emaxlength>maxlength){//判断哪个串长
+            return  s.substr(emaxindex-(emaxlength)/2+1,emaxlength);
+        }
+        else{
+            return  s.substr(maxindex-(maxlength-1)/2,maxlength);
+        }
+    }
+};
+```
+测试可以通过，速度超过了90多的答案，变量个数为常数，空间复杂度也没问题。
 
 
