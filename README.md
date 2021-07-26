@@ -366,4 +366,141 @@ public:
 ```
 测试可以通过，速度超过了90多的答案，变量个数为常数，空间复杂度也没问题。
 
+### LeetCode198 动态规划-打家劫舍1
+```
+给定一个非负的数组X，每个代表一个存有现金X[i]的房间。取走一个数字代表
+盗取这个房间的钱。如果两间相邻的房屋被盗，系统会自动报警。计算不触动警
+报装置的情况下能够偷窃到的最高金额。
+```
+```
+解题思路：先思考，如果在数组长度为1的情况下，则必定盗取，两家的话，则盗
+取第一家或者第二家。现由2家向后扩展盗n家，偷窃第n间房屋，那么就不能偷窃
+第n-1间房屋，偷窃总金额为前n−2间房屋的最高总金额与第n间房屋的金额之和。
+不偷窃第n间房屋，偷窃总金额为前n-1间房屋的最高总金额。这两个比大小，则
+得到n间房子的最大值，因此其实扩大到n家时，我们需要记录有n-1家时的最大值和
+n-2家时的最大值，因此代码如下：
 
+class Solution {
+public:
+    int rob(vector<int>& nums) {
+        //vector<int> gain(cost.size()+1,0);
+        int pprev = 0;
+        int prev = 0;
+        int cur = 0;
+        for(int i=0; i<nums.size(); i++){
+           cur = max(pprev+nums[i],prev);
+           pprev = prev;
+           prev =cur;
+        }
+        return cur;
+    }
+};
+```
+测试可以通过，速度0ms，变量个数为常数所以空间复杂度也没问题。
+
+### LeetCode213 动态规划-打家劫舍2
+```
+给定一个非负的数组X，每个代表一个存有现金X[i]的房间。取走一个数字代表
+盗取这个房间的钱。如果两间相邻的房屋被盗，系统会自动报警，其中房间成环
+形即最后一家与第一家为邻居，同时窃取将报警。计算不触动警报装置的情况下
+能够偷窃到的最高金额。
+```
+```
+解题思路：同样是动态规划，但是此时由于是环形，所以我们拆成2种情况，第一
+种偷取第一家，那么题目称为打家劫舍1，但是输入变为第二家到倒数第二家，第
+二种是不偷第一家，这样题目变为打家劫舍1，输入变成第二家到最后一家。这里
+取二者最大值即为该题目最优解。
+此代码如下：
+
+class Solution {
+public:
+    int rob_range(vector<int>& nums, int start, int end) {
+        int pprev = 0;
+        int prev = 0;
+        int cur = 0;
+        for(int i=start; i<end+1; i++){
+           cur = max(pprev+nums[i],prev);
+           pprev = prev;
+           prev =cur;
+        }
+        return cur;
+    }
+    int rob(vector<int>& nums) {
+        int first_rob = nums[0];
+        int first_notrob = nums[nums.size()-1];
+        first_rob = first_rob + rob_range(nums,2,nums.size()-2);
+        first_notrob = rob_range(nums,1,nums.size()-1);
+        return max(first_rob,first_notrob);
+    }
+};
+```
+测试可以通过，速度0ms，变量个数为常数所以空间复杂度也没问题。
+
+### LeetCode740 动态规划-删除并取点
+```
+给你一个整数数组nums，你可任意删除其中一个数并且获取它的点数，但是每次操
+作中，取走任意一个nums[i]之后，数组中所有等于nums[i]-1和nums[i]+1的元素
+都会消失，你可以多次选取直到数组为空。返回能通过这些操作获得的最大点数。
+```
+```
+解题思路：同样是动态规划，其实也是打家劫舍，这题相当于说是对于钱数为n的房
+可能有很多家，而且一旦钱数为n的房子失窃，钱数为n+1和n-1的房子就不能在再被
+偷窃（会警报），相当于打家劫舍中的相邻房屋不能一起失窃的条件。因此本题可以
+转化为打家劫舍，首先是排序，由于排序后若出现非相邻数值，那么他们的决策将不
+会影响到对方，之后遍历整个数组，所以将整个数组分成多个数组值相邻的段，每一
+段分别使用打家劫舍1的算法，此时每个数字的gain不同，应该为每个数字乘以他出
+现的次数。每段都打劫完之后最后求和则得到最大值。
+此代码如下：
+
+class Solution {
+public:
+    int rob_range(vector<int>& nums, int start, int end) {
+        int pprev = 0;
+        int prev = 0;
+        int cur = 0;
+        for(int i=start; i<end+1; i++){
+           cur = max(pprev+nums[i],prev);
+           pprev = prev;
+           prev =cur;
+        }
+        return cur;
+    }
+    int deleteAndEarn(vector<int>& nums) {
+        vector<int> buf(nums.size()+1,0);
+        vector<int> gain(nums.size()+1,0);
+        vector<int> index(nums.size()+1,0);
+        sort(nums.begin(), nums.end());
+        int prev = nums[0],samecount = 0,roblength = 1;
+        int index_ct = 0,gain_total = 0,groups = 0;
+        for(int i=0;i<nums.size();i++){
+            if(prev == nums[i]){// if equals last number 
+                samecount++;
+                gain[index_ct] = nums[i]*samecount;
+                if(i==nums.size()-1){index[++groups] = roblength;}
+            }
+            else if (prev == nums[i]-1){// if a number that is 1 bigger
+                samecount = 1;
+                gain[++index_ct] = nums[i]*samecount;
+                prev = nums[i];
+                roblength++;
+                if(i==nums.size()-1){index[++groups] = roblength;}
+            }
+            else{//if the number is gapped
+                samecount = 1;
+                gain[++index_ct] = nums[i]*samecount;
+                if(i==nums.size()-1){index[groups+1] = 1;}
+                index[groups++] = roblength;
+                roblength = 1;
+                prev = nums[i];
+            }
+        }
+        int ct = 0;
+        for(int i=0;i<=groups;i++){
+            gain_total = gain_total + rob_range(gain,ct,ct+index[i]-1);
+            ct = ct + index[i];
+        }
+        return gain_total;
+    }
+};
+```
+测试可以通过，时间复杂度nlog(N),速度8ms，空间复杂度为O(3N)。
