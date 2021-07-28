@@ -504,3 +504,154 @@ public:
 };
 ```
 测试可以通过，时间复杂度nlog(N),速度8ms，空间复杂度为O(3N)。
+
+### LeetCode055 动态规划-贪心算法-跳跃游戏1
+```
+给定一个非负整数数组nums，最初位于数组的第一个下标。数组中的每个元素代表
+你在该位置可以跳跃的最大长度。判断是否能够到达最后一个下标。
+```
+```
+解题思路1：动态规划，由于此时要到达最后一个则必须在最后一个元素前面有可以
+到达最后一个元素的跳板元素，依次类推，每个元素都需要一个跳板元素，因此可以
+从前向后搜索，搜到第一个可以跳到最后元素的元素时，记录下来，下一次继续搜索
+但是此时的数组变为0号元素到上一次搜索到的元素，循环执行，直到搜索返回零号
+元素或者目标不可达。代码如下：
+
+class Solution {
+public:
+    int find_mid(vector<int>& nums,int end){
+        int x = -1;
+            for(int i=0;i<end;i++){
+                if(end-i<=nums[i]){
+                    x = i;
+                }
+            }
+            return x;
+
+    }
+    bool canJump(vector<int>& nums) {
+        int tmp = nums.size()-1;
+        while(tmp!=0){
+            tmp = find_mid(nums,tmp);
+            if(tmp==-1){return 0;}
+        }
+        return 1;
+    }
+};
+```
+测试可以通过，速度1848ms，时间复杂度O(n2),变量个数有限，因此为空间
+复杂度是1。
+
+解题思路2：贪心算法，由于此时我们每次在知道当前能跳多远之后，则得到一个区间
+，在这个区间中，我们可以任意选择跳板且跳的最大落点我们也知道，跳的越远越好，
+所以我们直接做一次循环，维护tmpmax变量，每次在下标小于tmpmax的元素中计算他
+的最大跳跃落点，若大于tmpmax则更新，直到tmpmax不小于数组长度，或者搜索到
+tmpmax但是无法到达数组终点则失败。代码如下：
+
+class Solution {
+public:
+    bool canJump(vector<int>& nums) {
+        int tmp = 0;
+        for(int i=0;i<nums.size();i++){
+            if(i<=tmp){
+                tmp = max(tmp,i+nums[i]);
+            }
+        }
+        if(tmp>=nums.size()-1){return 1;}
+        return 0;
+    }
+};
+测试可以通过，速度44ms，时间复杂度O(n),变量个数有限，因此为空间
+复杂度是1。
+    
+### LeetCode045 动态规划-贪心算法-跳跃游戏2
+```
+给定一个非负整数数组nums，最初位于数组的第一个下标。数组中的每个元素代表
+你在该位置可以跳跃的最大长度。判断最少需要多少步才能跳到最后一格。假设数组
+稳定可以跳到最后。
+```
+```
+解题思路1：动态规划，按照跳跃游戏1的思路动态规划，要跳最后一格必须跳到能到
+最后一格的下标最小的一格，直接在循环中记录运行次数即可代码如下：
+
+class Solution {
+public:
+    int find_mid(vector<int>& nums,int end){
+        int x = -1;
+            for(int i=0;i<end;i++){
+                if(end-i<=nums[i]){
+                    x = i;
+                    return x;//一旦找到可达的，直接返回作为下一次的end
+                }
+            }
+            return x;
+    }
+    int jump(vector<int>& nums) {
+        int tmp = nums.size()-1;
+        int count = 0;
+        while(tmp!=0){
+            tmp = find_mid(nums,tmp);
+            count++;
+        }
+        return count;
+    }
+};
+```
+测试可以通过，速度80ms，时间复杂度O(n2),变量个数有限，因此为空间
+复杂度是1。
+
+解题思路2：贪心算法，由于每次在知道当前能跳多远之后，会得到一个区间，在这个
+区间中，我们可以任意选择跳板且跳的最大落点我们也知道，跳的越远越好，所以我们
+直接做一次循环，维护tmpmax变量，每次在下标小于tmpmax的元素中找到他的最大跳
+跃落点和起跳的元素，依次循环，每次都找到最大跳跃落点和跳板序号，直到tmpmax
+不小于数组长度，代码如下：
+
+class Solution {
+public:
+    int jump(vector<int>& nums) {
+        int n = nums.size()-1,count=0;
+        int i=0,tmpmax=0,index=0;
+        while(nums[i]+i<n){
+            for(int j=i+1;j<=i+nums[i];j++){//在区间内找跳最远的跳板
+                if(j+nums[j]>=tmpmax){
+                    tmpmax = j+nums[j];
+                    index = j;
+                }
+            }
+            i = index;//改变搜索起点
+            count++;
+        }
+        if (n==0) return count;
+        return count+1;
+    }
+};
+测试可以通过，速度18ms，时间复杂度O(n2),变量个数有限，因此为空间
+复杂度是1。
+    
+解题思路3：贪心算法，改进上一个算法，由于在231454这种情况下会出现多次查询
+中间那个1是否能作为最大跳板的情况（2做起点查询一次，3作起点查询一次），
+所以为了避免这种情况，我们让i只增不减，只在跳完之后再更新max，每次跳完计数
+加一，代码如下：
+
+class Solution {
+public:
+int jump(vector<int>& nums)
+    {
+        int ans = 0;
+        int end = 0;
+        int maxPos = 0;
+        for (int i = 0; i < nums.size() - 1; i++)
+        {
+            maxPos = max(nums[i] + i, maxPos);
+            if (i == end)
+            {
+                end = maxPos;
+                ans++;
+            }
+        }
+        return ans;
+    }
+
+};
+测试可以通过，速度8ms，时间复杂度O(n),变量个数有限，因此为空间
+复杂度是1。
