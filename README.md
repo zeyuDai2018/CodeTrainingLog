@@ -658,3 +658,228 @@ int jump(vector<int>& nums)
 测试可以通过，速度8ms，时间复杂度O(n),变量个数有限，因此为空间
 复杂度是1。
 ```
+
+### LeetCode055 动态规划-贪心算法-跳跃游戏1
+```
+给定一个非负整数数组nums，最初位于数组的第一个下标。数组中的每个元素代表
+你在该位置可以跳跃的最大长度。判断是否能够到达最后一个下标。
+```
+```
+解题思路1：动态规划，由于此时要到达最后一个则必须在最后一个元素前面有可以
+到达最后一个元素的跳板元素，依次类推，每个元素都需要一个跳板元素，因此可以
+从前向后搜索，搜到第一个可以跳到最后元素的元素时，记录下来，下一次继续搜索
+但是此时的数组变为0号元素到上一次搜索到的元素，循环执行，直到搜索返回零号
+元素或者目标不可达。代码如下：
+
+class Solution {
+public:
+    int find_mid(vector<int>& nums,int end){
+        int x = -1;
+            for(int i=0;i<end;i++){
+                if(end-i<=nums[i]){
+                    x = i;
+                }
+            }
+            return x;
+
+    }
+    bool canJump(vector<int>& nums) {
+        int tmp = nums.size()-1;
+        while(tmp!=0){
+            tmp = find_mid(nums,tmp);
+            if(tmp==-1){return 0;}
+        }
+        return 1;
+    }
+};
+```
+测试可以通过，速度1848ms，时间复杂度O(n2),变量个数有限，因此为空间
+复杂度是1。
+```
+解题思路2：贪心算法，由于此时我们每次在知道当前能跳多远之后，则得到一个区间
+，在这个区间中，我们可以任意选择跳板且跳的最大落点我们也知道，跳的越远越好，
+所以我们直接做一次循环，维护tmpmax变量，每次在下标小于tmpmax的元素中计算他
+的最大跳跃落点，若大于tmpmax则更新，直到tmpmax不小于数组长度，或者搜索到
+tmpmax但是无法到达数组终点则失败。代码如下：
+
+class Solution {
+public:
+    bool canJump(vector<int>& nums) {
+        int tmp = 0;
+        for(int i=0;i<nums.size();i++){
+            if(i<=tmp){
+                tmp = max(tmp,i+nums[i]);
+            }
+        }
+        if(tmp>=nums.size()-1){return 1;}
+        return 0;
+    }
+};
+测试可以通过，速度44ms，时间复杂度O(n),变量个数有限，因此为空间
+复杂度是1。
+```
+
+### LeetCode053 动态规划-最大子序和
+```
+给定一个整数数组nums，求他最大的连续子序列和1,2，-3,4则最大子序为4。
+```
+```
+解题思路：动态规划，若我们已知以a[i]为结尾的数组最大子序和，那么a[i+1]的最
+大子序和则是max(a[i+1],a[i+1]+maxsum(a[i]))，因为由a[0]为结尾的数组最大子
+序和就是a[0]，因此可以用一个for循环搞定。是典型的动态规划题。
+class Solution {
+public:
+    int maxSubArray(vector<int>& nums) {
+        int maxsum=nums[0];
+        int movingsum=nums[0];
+        for (int i=1;i<nums.size();i++){
+            movingsum = max(nums[i],movingsum+nums[i]);
+            maxsum = max(maxsum,movingsum);
+        }
+        return maxsum;
+    }
+};
+
+测试可以通过，速度4ms，时间复杂度O(n),变量个数有限，因此为空间复杂度是1。
+```
+
+### LeetCode918 动态规划-环形最大子序和
+```
+给定一个整数数组nums，这里数组为环形即最后一个数的下一个数为第一个数，求他最大
+的连续子序列和例如1,2，-3,4则最大子序不是4而是4+1+2=7。
+```
+```
+解题思路：动态规划，因为已经知道如何解决非环形情况，因此我们可以直接拆成两种情况，
+第一种，最大子序中不包含a[size-1]和a[0]，那么相当于无环就是正常最大子序和。第二
+种，最大子序包含了a[size-1]和a[0]时，那么由于整个数组和固定，那么其实是要在数组
+删去两头之后求剩下数组的最小子序和并且删掉，剩下的就是原数组的最大环形子序和。两
+者中最大的就是最大值。
+class Solution {
+public:
+    int maxSubarraySumCircular(vector<int>& nums) {
+        int max_=nums[0];
+        int maxsum=nums[0];
+        int movingsum=nums[0];
+        int minsum=nums[0];
+        if(nums.size()==1)return nums[0];
+        for (int i=1;i<nums.size();i++){
+            movingsum = max(nums[i],movingsum+nums[i]);
+            maxsum = max(maxsum,movingsum);
+        }
+        minsum= nums[1];
+        movingsum = nums[1];
+        for (int i=2;i<nums.size()-1;i++){
+            movingsum = min(nums[i],movingsum+nums[i]);
+            minsum = min(minsum,movingsum);
+        }
+        int tmp = 0;
+        for (int i=0;i<nums.size();i++){
+            tmp = nums[i]+tmp;
+        }
+        max_ = max(tmp-minsum,maxsum);
+        return max_;
+    }
+};
+测试可以通过，速度64ms，时间复杂度O(n),变量个数有限，因此为空间复杂度是1。
+```
+
+### LeetCode152 动态规划-乘积最大子数组
+```
+给定一个整数数组nums，求他最大的连续子序列乘积例如1,2，-3,4则最大子序积是4。
+```
+```
+解题思路：动态规划，和最大子序和类似，由于此时最大值可能会在正负值之间跳变，
+所以此时应该维护两个变量，最小乘积最大乘积，的最大乘积在以下三个数字中，
+num[i],num[i]*product_min，num[i]*product_max，最小值也在以下三个数字中，
+每次更新都同时更新product_min和product_max以及最后要返回的max。
+
+class Solution {
+public:
+    int maxProduct(vector<int>& nums) {
+        int mulmax1 = nums[0];
+        int mulmax2 = nums[0];
+        int mulmin1 = nums[0];
+        int mulmin2 = nums[0];
+        int tpmax = nums[0];
+        int tpmin = nums[0];
+        for(int i=1;i<nums.size();i++){
+            mulmax1 = max(mulmax2*nums[i],mulmin2*nums[i]);
+            mulmin1 = min(mulmin2*nums[i],mulmax2*nums[i]);
+            mulmax2 = max(nums[i],mulmax1);
+            tpmax = max(tpmax,mulmax2);
+            mulmin2 = min(mulmin1,nums[i]);
+            //cout<<"the maxpto is "<< mulmax<<endl;
+            //cout<<"the minpto is "<< mulmin<<endl;
+            tpmin = min(tpmin,mulmin2);
+        }
+        return tpmax;
+    }
+};
+测试可以通过，速度8ms，时间复杂度O(n),变量个数有限，因此为空间复杂度是1。
+```
+
+### LeetCode1567 动态规划-乘积正数最大子数组长
+```
+给定一个整数数组nums，求他乘积为正数的最长子数组长度。
+```
+```
+解题思路：动态规划，和最大子序积类似，由于现在有正负交替，因此肯定也是需要维
+护2个变量，假设我们现在知道pos_len_max(num[i])和neg_len_max(num[i])，那
+么我们对于i=i+1时的这两个变量值是可以根据当前的num[i]推测出来的，具体逻辑看
+代码。总结一下就是关于数组问题，动态规划时可以设置一个dp(nums[i]),然后随着
+i增写出i=i+1时dp值的表达式，但是很多题这样做不出来，比如现在的乘法会出现跳变
+所以需要维护两个变量neg和pos来做。
+
+class Solution {
+public:
+    int getMaxLen(vector<int>& nums) {
+        int neglen_pre = 0;
+        int poslen_pre = 0;
+        int neglen = 0;
+        int poslen = 0;
+        int swap = 0;
+        int max_poslen = 0;
+        int mulres = nums[0];
+        for(int i=0;i<nums.size();i++){
+            if(nums[i]<0){
+                if(neglen_pre!=0){                
+                    poslen = neglen_pre+1;
+                }
+                else{
+                    poslen = 0;
+                }
+                if(poslen_pre!=0){
+                    neglen = poslen_pre+1;
+                }
+                else{
+                    neglen = 1;
+                }
+            }
+            else if(nums[i]>0){
+                if(poslen_pre!=0){                
+                    poslen = poslen_pre+1;
+                }
+                else{
+                    poslen = 1;
+                }
+                if(neglen_pre!=0){                
+                    neglen = neglen_pre+1;
+                }
+                else{
+                    neglen = 0;
+                }
+            }
+            else{
+                poslen=0;
+                neglen=0;
+            }
+            max_poslen = max(max_poslen,poslen);
+            poslen_pre = poslen;
+            neglen_pre = neglen;
+        }
+        return max_poslen;
+    }
+};
+测试可以通过，速度88ms，时间复杂度O(n),变量个数有限，因此为空间复杂度是1。
+```
+
