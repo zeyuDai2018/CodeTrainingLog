@@ -883,3 +883,61 @@ public:
 测试可以通过，速度88ms，时间复杂度O(n),变量个数有限，因此为空间复杂度是1。
 ```
 
+
+### LeetCode121 买卖股票的最佳时机
+```
+给定一个整数数组prices，其中每个数字为当天的股票销售价格，只能买卖一次，求最
+大能获得的利益。
+```
+```
+解题思路：动态规划，首先思考一次遍历数组，下标从0到len-1，那么假设我们知道
+当前从左到右长度为i+1的数组中的最小购入价格即min_和最大收益max_gain,那么
+i+2长度数组的最大收益则应当为当前price[i+1]-min_和上一轮max_gain的最大值。
+同时，此时应该更新当前数组的最小购入价格即min_。由此我们得到了这一递推公式，
+使用c语言实现如下：
+
+class Solution {
+public:
+    int maxProfit(vector<int>& prices) {
+        int gain = 0;
+        int min_ = prices[0];
+        for (int i=0;i<prices.size();i++){
+            min_ = min(min_,prices[i]);
+            gain = max(gain,prices[i]-min_);
+        }
+        return gain;
+    }
+};
+测试可以通过，速度100ms，时间复杂度O(n),变量个数有限，因此为空间复杂度是1。
+```
+
+### LeetCode122 买卖股票的最佳时机2
+```
+给定一个整数数组nums，其中每个数字为当天的股票销售价格，可以任意次买卖股票，
+但是同时只能持有一只股票，即只能买卖买卖，不能买买卖。求在这些天数内最大能
+获得的利益。
+```
+```
+解题思路1：动态规划，首先：
+
+class Solution {
+public:
+    int maxProfit(vector<int>& prices) {
+        int C_stock = 0;
+        int C_nstock = 0;
+        int P_stock = -prices[0];
+        int P_nstock = 0;
+        int gain_total = 0;
+        int gain_max = 0;
+        int len_ = prices.size();
+        for(int i=0;i<len_;i++){
+            C_nstock = max(P_stock + prices[i],P_nstock);
+            C_stock = max(P_nstock - prices[i],P_stock);
+            P_stock = C_stock;
+            P_nstock = C_nstock;
+        }
+        return C_nstock;
+    }
+};
+测试可以通过，速度4ms，时间复杂度O(n),变量个数有限，因此为空间复杂度是1。
+```
