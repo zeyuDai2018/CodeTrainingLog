@@ -971,3 +971,49 @@ public:
 };
 测试可以通过，速度4ms，时间复杂度O(n),变量个数有限，因此为空间复杂度是1。
 ```
+
+### LeetCode309 含冷冻期的购买股票最佳时期
+```
+给定一个整数数组nums，其中每个数字为当天的股票销售价格，可以任意次买卖股票，
+但是同时只能持有一只股票，且若当天卖出了股票，则第二天不能购买即冷冻期为1天。
+求在这些天数内最大能获得的利益。
+```
+```
+解题思路1：动态规划，类似122题，但是由于当前有不持股时有两个状态，一个是处于
+冷冻期，一个是不处于冷冻期假。因此现建立三个变量分别表示前一天持股所得最大收益
+P_Stock和当天不持股但处于冷却所得最大收益P_nstock_cool，和当天不持股但不冷却
+P_nstock_ncook。明天的持股最大收益定义为C_Stock和不持股C_nstock_cool和
+C_nstock_ncool最大收益，思考购买股票的过程，可以得到以下状态转移公式，假设当
+天价格为price[i],那么此时C_stock只能由P_stock保持不变或P_nstock_ncool并且当
+天购买得到，而C_nstock_cool只能从P_stock时出售得到，C_nstock_ncool则可以由
+P_nstock_ncool和P_nstock_cool连个状态保持不变得到。由此，根据每个情况各自计算
+最大收益递推到i=len-1即可。又因为持股和不持股一定是持股收益小，故最后取两个不持股
+的最大收益即可。易得代码如下：
+
+class Solution {
+public:
+    int maxProfit(vector<int>& prices) {
+        int length = prices.size();
+        int P_hld = -prices[0];
+        int P_nhld_buyable = 0;
+        int P_nhld_nbuyable = 0;
+        int C_hld = 0;
+        int C_nhld_buyable = 0;
+        int C_nhld_nbuyable = 0;
+        for(int i=0;i<length;i++){
+            C_hld = max(P_hld,P_nhld_buyable-prices[i]);
+            C_nhld_buyable = max(P_nhld_nbuyable,P_nhld_buyable);
+            C_nhld_nbuyable = P_hld + prices[i];
+            P_hld = C_hld;
+            P_nhld_buyable = C_nhld_buyable;
+            P_nhld_nbuyable = C_nhld_nbuyable;
+        }
+        int maxm = 0;
+        maxm = max(C_nhld_nbuyable,C_nhld_buyable);
+        return maxm;
+    }
+};
+测试可以通过，速度8ms，时间复杂度O(n),变量个数有限，因此为空间复杂度是1。
+```
+
+
