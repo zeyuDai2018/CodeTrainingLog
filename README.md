@@ -918,7 +918,12 @@ public:
 获得的利益。
 ```
 ```
-解题思路1：动态规划，首先：
+解题思路1：动态规划，首先思考，假设有两个变量分别表示前一天持股所得最大收益
+P_Stock和当天不持股所得最大收益P_nstock，要计算明天的持股最大收益C_Stock和
+不持股C_nstock最大收益，那么其实可以推出，若此时当天价格为price[i],那么此时
+C_stock只能由P_stock保持不变或P_nstock并且当天购买得到，因此C_stock为二两种
+情况获益的最大值，而C_nstock则是从P_nstock当天不购买和P_stock当天卖出的收益
+两者最大值。易得代码如下：
 
 class Solution {
 public:
@@ -937,6 +942,31 @@ public:
             P_nstock = C_nstock;
         }
         return C_nstock;
+    }
+};
+测试可以通过，速度4ms，时间复杂度O(n),变量个数有限，因此为空间复杂度是1。
+```
+
+```
+解题思路2：贪心算法，由于完全不限制购买次数，因此我们可以设想，只要我发现后
+一天的出售价格比前一天的购买价格高，那额前一天买后一天卖就是有意义的，由此，
+只要遍历一次数组，每次遍历到prices[i]时记录i-1的价格，若i-1低于i价格，那么
+就加入总收益。
+
+class Solution {
+public:
+    int maxProfit(vector<int>& prices) {
+        if(prices.size()==1) return 0;
+        int leng_=prices.size();
+        int gain = 0;
+        for(int i=0;i<leng_;i++){
+            if(i!=leng_-1){
+                if(prices[i]<prices[i+1]){
+                    gain = gain + prices[i+1] - prices[i];
+                }
+            }
+        }
+        return gain;
     }
 };
 测试可以通过，速度4ms，时间复杂度O(n),变量个数有限，因此为空间复杂度是1。
